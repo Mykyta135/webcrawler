@@ -1,5 +1,30 @@
 const { JSDOM } = require("jsdom");
 
+async function crawlPage(baseURL) {
+  try {
+    const resp = await fetch(baseURL);
+
+    if (resp.status > 399) {
+      throw new Error(
+        `Fetch error, status: ${resp.status}, on page ${baseURL}`
+      );
+    }
+
+    const contentType = resp.headers.get("content-type");
+
+    if (!contentType.includes("text/html")) {
+      throw new Error(
+        `Fetch error, content-type: ${contentType}, on page ${baseURL}`
+      );
+    }
+
+    console.log(await resp.text());
+  } catch (error) {
+    console.error(error.message);
+    return;
+  }
+}
+
 function normalizeURL(urlString) {
   const hostname = new URL(urlString).hostname;
   const pathname = new URL(urlString).pathname;
@@ -41,4 +66,5 @@ function getURLsFromHTML(htmlBody, baseURL) {
 module.exports = {
   normalizeURL,
   getURLsFromHTML,
+  crawlPage,
 };
